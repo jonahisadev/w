@@ -1,0 +1,83 @@
+#!/bin/bash
+
+function print_help() {
+  echo -e "usage: w.spad [opts] -- Scratchpad notes"
+  echo -e "    -n|--new\t\t\tCreate a new scratchpad"
+  echo -e "    -l|--latest\t\t\tPrint latest scratchpad filename"
+  echo -e "    -m|--migrate <filename>\tAppend scratchpad contents to filename"
+  echo -e "    -c|--clear\t\t\tClear all scratchpads"
+  echo -e "    --pop\t\t\tDelete latest scratchpad"
+  exit 1
+}
+
+cd ~/notes
+mkdir -p .scratch
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --help) print_help ;;
+    -n|--new) new=1 ;;
+    -l|--latest) latest=1 ;;
+    -m|--migrate) migrate="$2"; shift ;;
+    -c|--clear) clear=1 ;;
+    --pop) pop=1 ;;
+    *) echo "Unknown param: $1"; exit 1 ;;
+  esac
+  shift;
+done
+
+count=$(ls .scratch | tr " " "\n" | wc -l | xargs)
+
+if [[ "$latest" -eq 1 ]]; then
+  filename=$(ls .scratch | tr " " "\n" | sort -r | head -n 1)
+  if [[ -z "$filename" ]]; then
+    exit 1
+  fi
+  echo "$filename"
+  exit 0
+fi
+
+if [[ "$clear" -eq 1 ]]; then
+  read -p "Are you sure? [y/N] " -r
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    rm -rf .scratch/**
+    echo "Cleared scratchpads"
+  else
+    echo "Did not do anything"
+  fi
+  exit 0
+fi
+
+if [[ -n "$pop" ]]; then
+  filename="$(ls .scratch | tr " " "\n" | sort -r | head -n 1)"
+  if [[ -z "$filename" ]]; then
+    echo "Scratchpad is empty"
+    exit 1
+  fi
+  read -p "Are you sure? ($filename) [y/N] " -r
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    rm -f ".scratch/$filename"
+    echo "Cleared scratchpad \"$filename\""
+  else
+    echo "Did not do anything"
+  fi
+  exit 0
+fi
+
+if [[ -n "$migrate" ]]; then
+  filename=$(ls .scratch | tr " " "\n" | sort -r | head -n 1)
+  to=$(w.name "$migrate")
+  cat ".scratch/$filename" >> "$to"
+  rm ".scratch/$filename"
+  exit 0
+fi
+
+if [[ "$new" -eq 1 ]] || [[ $count -eq 0 ]]; then
+  day=$(date +%j)
+  filename=".scratch/scratch-$day.md"
+  touch "$filename"
+else
+  filename=".scratch/$(ls .scratch | tr " " "\n" | sort -r | head -n 1)"
+fi
+
+nvim $filename

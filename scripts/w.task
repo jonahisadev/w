@@ -1,0 +1,38 @@
+#!/bin/bash
+
+function print_help() {
+  echo -e "usage: w.task [opts] -- Task utilities"
+  echo -e "    -i|--id\tOpen note at list with id"
+  echo -e ""
+  echo -e "    To identify a todo list in your notes, use the following format:"
+  echo -e "    @todo <id> where <id> is the ID of your list. For example:"
+  echo -e "    Writing '@todo foobar' means I can open my task list directly by"
+  echo -e "    calling '\$ w.task -i foobar'"
+  exit 1
+}
+
+if [[ -z "$EDITOR" ]]; then
+  EDITOR="nvim"
+fi
+
+GREP=rg
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --help) print_help ;;
+    -i|--id) id="$2"; shift ;;
+    *) echo "Unknown param: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+
+cd ~/notes/
+
+if [[ -n "$id" ]]; then
+  res=$($GREP -n "@todo $id" .)
+  filename=$(echo "$res" | awk -F ":" '{ print $1 }')
+  no=$(echo "$res" | awk -F ":" '{ print $2 }')
+
+  $EDITOR "+$no" "$filename"
+fi

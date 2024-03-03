@@ -1,0 +1,26 @@
+#!/bin/bash
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -f|--filename) filename="$2"; shift ;;
+    -a|--attr) attr="$2"; shift ;;
+    *) echo "Unknown param: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+lines=($(cat "$filename" | rg -n '^---$' | tr " " "\n" | awk -F ':' '{print $1}'))
+
+if [[ "${#lines[@]}" -lt 2 ]]; then
+  exit 1
+fi
+
+start="${lines[0]}"
+end="${lines[1]}"
+header=$(sed -n "$((start+1)),$((end-1)) p" $filename)
+
+if [[ -n "$attr" ]]; then
+  echo "$header" | rg "^$attr:\s+(.*)" -r '$1'
+else
+  echo "$header"
+fi

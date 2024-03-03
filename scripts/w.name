@@ -1,0 +1,23 @@
+#!/bin/bash
+
+FZF=fzf
+cd ~/notes
+
+files=$(find . -path "*/*" -iname "$1.*")
+count=$(echo $files | tr " " "\n" | wc -l | xargs)
+
+if [ "$count" -eq 0 ]; then
+  echo "No notes found"
+  exit 1
+elif [ "$count" -gt 1 ]; then
+  tput clear
+  file=$(echo $files | tr " " "\n" | $FZF --preview="less {}")
+  if [[ -z "$file" ]]; then
+    echo "No file selected"
+    exit 0
+  fi
+else
+  file=$files
+fi
+
+echo $file

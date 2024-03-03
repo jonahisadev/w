@@ -1,0 +1,21 @@
+#!/bin/bash
+
+year=$(date +%Y)
+month=$(date +%m)
+day=$(date +%d)
+
+monthName=$(date +%b)
+
+header="---\ntitle: Journal - $monthName $day, $year\ndate: $monthName $day, $year ($month-$day-$year)\ntags: journal\n---\n\n"
+
+cd ~/notes/
+mkdir -p $year
+
+filepath="$year/$month-$day-$year.md"
+if ! test -f $filepath; then
+  touch $filepath
+  echo -ne $header > $filepath
+fi
+
+w.title "$filepath"
+nvim $filepath $@

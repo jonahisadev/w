@@ -1,0 +1,6 @@
+#!/bin/bash
+
+title=$(w.header -f "$1" -a "title")
+if [[ -n "$title" ]]; then
+  printf "\033]2;$title\a"
+fi

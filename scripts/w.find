@@ -1,0 +1,44 @@
+#!/bin/bash
+
+GREP="rg"
+FZF="fzf"
+
+function print_help() {
+  echo -e "usage: w.find [opts] -- Search for a note"
+  echo -e "    -t|--tags <name>\tFind notes with a tag"
+  echo -e "    -q|--query <text>\tSearch notes containing the given text"
+  exit 1
+}
+
+if [[ -z "$EDITOR" ]]; then
+  EDITOR="nvim"
+fi
+
+cd ~/notes/
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --help) print_help ;;
+    -t|--tags) tags="$2"; shift ;;
+    -q|--query) query="$2"; shift ;;
+    *) echo "Unknown param: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+if [[ -n "$tags" ]]; then
+  files=$($GREP -l "(^tags:).*$tags" .)
+elif [[ -n "$query" ]]; then
+  files=$($GREP -l "$query" .)
+else
+  files=$(find . -wholename "*/*.md")
+fi
+
+filepath=$(echo $files | tr " " "\n" | $FZF --preview="less {}")
+if [[ -z "$filepath" ]]; then
+  echo "No file selected"
+  exit 0
+fi
+
+w.title "$filepath"
+$EDITOR $filepath

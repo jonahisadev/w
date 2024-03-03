@@ -1,0 +1,57 @@
+#!/bin/bash
+
+function print_help() {
+  echo -e "usage: w.open [opts] <name?> -- Open a note"
+  echo -e "    -n|--new <name>\tOpen a new file with <name>.md"
+  echo -e "    -top-level\t\tDo not organize this file"
+  echo -e ""
+  echo -e "    With no options, open the file with the given name"
+  exit 1
+}
+
+if [[ -z "$EDITOR" ]]; then
+  EDITOR="nvim"
+fi
+
+if [[ "$#" -eq 0 ]]; then
+  echo "Please provide a filename"
+  exit 1
+fi
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --help) print_help ;;
+    -n|--new) new="$2"; shift ;;
+    --top-level) top=1 ;;
+    *) break ;;
+  esac
+  shift
+done
+
+cd ~/notes/
+
+if [[ -n "$new" ]]; then
+  if [[ -n "$top" ]]; then
+    filepath="$new.md"
+  else
+    year=$(date +%Y)
+    filepath="$year/$new.md"
+  fi
+  touch "$filepath"
+  $EDITOR "$filepath"
+  exit 0
+fi
+
+filename=$(w.name $1)
+code="$?"
+if [[ "$code" -ne 0 ]]; then
+  case $code in
+    1) echo "No notes with that name" ;;
+    2) echo "No file selected" ;;
+    *) echo "Unknown error" ;;
+  esac
+  exit 1
+fi
+
+w.title "$filename"
+$EDITOR "$filename"
