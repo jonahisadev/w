@@ -5,7 +5,7 @@ tried to write these to rely on as little dependencies as possible.
 
 The scripts are called "w" because I played too many games as a kid and my typing
 home row is basically just WASD and so I always have a finger near "w" which
-makes the "w.<thing>" syntax work really well for me </run-on-sentence>
+makes the "w.<thing>" syntax work really well for me &lt;/run-on-sentence>
 
 The notes location is `~/notes/`. This cannot change as of now, but I or someone
 else who cares enough can add that later.
