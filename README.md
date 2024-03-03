@@ -27,3 +27,10 @@ The default is `/usr/local/bin`
 
 I wrote these in bash for my system so it might not work 100% for you. If you
 spot any issues, please feel free to open a PR with your fix.
+
+I also wrote an environment script you can source in your shell to easily call
+the scripts without permanently adding them to your path.
+
+```bash
+$ source env.sh
+```
